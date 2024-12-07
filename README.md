@@ -1,4 +1,4 @@
-# Capstone Project AGISIT G46
+# Capstone Project 
 
 The project's objective is to implement a simple and functional web application based on microservices. 
 
@@ -39,11 +39,6 @@ Traffic is managed using load balancing across both web servers and microservice
 - **Part II - Database backend service with persistent storage**: 
 A database backend service with persistent storage is employed to store data. Terraform deploys a MongoDB instance, which is then configured via an Ansible playbook. Each microservice connects to the database using individual Mongoose connections and schemas, since the business logics are different. This ensures that all endpoints are interrelated and can interact with the database.
 
-
-## Metrics
-
-TODO
-
 ## Report
 
 [Report](docs/project-g46.odt)
@@ -56,5 +51,6 @@ TODO
 
 ## Contributing
 
-Paulo Bolinhas 110976
-Rui Martins 110890
+Paulo Bolinhas
+
+Rui Martins
