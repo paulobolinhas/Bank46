@@ -6,13 +6,13 @@ The project's objective is to implement a simple and functional web application 
 
 ![Bank46 Badge](https://img.shields.io/badge/Bank46-WebMicroservices%20App-brightgreen)
 
-## Initial Note
-
-cloud keys deprecated
-
 ## Description
 
 **Bank46** is our cloud-powered banking web application, entailing the use of automation tools, designed to manage core microservices such as Insurance, Loan, and Transaction processing.
+
+## Initial Note
+
+cloud keys deprecated
 
 ## Architecture
 
