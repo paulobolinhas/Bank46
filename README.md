@@ -45,8 +45,6 @@ A database backend service with persistent storage is employed to store data. Te
 
 ## Video
 
-TODO
-
 [Video](yt)
 
 ## Contributing
