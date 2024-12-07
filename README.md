@@ -14,6 +14,10 @@ The project's objective is to implement a simple and functional web application 
 
 ![Bank46 Architecture](docs/BANK46_architecture.png)
 
+## Initial Note
+
+cloud keys deprecated
+
 ## Setup
 
 - **Vagrant Setup**: The deployment process starts by using Vagrant to create a virtual machine (mgmt) for management purposes. Running the command ```vagrant up mgmt``` initiates the 'Vagrantfile' and the 'bootstrap-mgmt.sh' script that set up the management environment. 
