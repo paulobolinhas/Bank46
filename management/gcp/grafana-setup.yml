@@ -1,0 +1,107 @@
+---
+- name: Install and run Grafana
+  hosts: monitor
+  become: yes
+  tasks:
+    - name: Install required dependencies
+      apt:
+        name: 
+          - apt-transport-https
+          - software-properties-common
+          - wget
+        state: present
+        update_cache: yes
+
+    - name: Create the Grafana GPG keyring directory
+      file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: '0755'
+
+    - name: Download and add Grafana GPG key using shell
+      ansible.builtin.shell: |
+        wget -q -O - https://apt.grafana.com/gpg.key | gpg --dearmor | sudo tee /etc/apt/keyrings/grafana.gpg > /dev/null
+      args:
+        warn: false
+
+    - name: Add Grafana repository
+      ansible.builtin.shell: |
+        echo "deb [signed-by=/etc/apt/keyrings/grafana.gpg] https://apt.grafana.com stable main" | tee -a /etc/apt/sources.list.d/grafana.list
+      args:
+        warn: false
+
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install Grafana Enterprise using shell
+      ansible.builtin.shell: |
+        sudo apt-get install -y grafana-enterprise
+      args:
+        warn: false
+
+    - name: Modify Grafana configuration to listen on all interfaces
+      lineinfile:
+        path: /etc/grafana/grafana.ini
+        regexp: '^#*\s*http_addr\s*='
+        line: 'http_addr = 0.0.0.0'
+        insertafter: '\[server\]'
+        state: present
+        create: yes
+    
+    - name: Set Grafana admin username
+      lineinfile:
+        path: /etc/grafana/grafana.ini
+        regexp: '^#*\s*admin_user\s*='
+        line: 'admin_user = admin'
+        insertafter: '\[security\]'
+        state: present
+        create: yes
+
+    - name: Set Grafana admin password
+      lineinfile:
+        path: /etc/grafana/grafana.ini
+        regexp: '^#*\s*admin_password\s*='
+        line: 'admin_password = admin'
+        insertafter: '\[security\]'
+        state: present
+        create: yes
+
+    - name: Restart Grafana service to apply changes
+      systemd:
+        name: grafana-server
+        state: restarted
+        enabled: yes
+      
+    - name: Restart Grafana service to apply changes
+      systemd:
+        name: grafana-server
+        state: restarted
+        enabled: yes
+
+    # Adding Prometheus as a data source using basic authentication with base64 encoding
+    - name: Encode Grafana admin credentials for basic auth
+      set_fact:
+        grafana_auth_header: "{{ 'admin:admin' | b64encode }}"
+
+    # If local host does not work, put machine IP
+    - name: Add Prometheus as a data source in Grafana
+      uri:
+        url: "http://localhost:3000/api/datasources"
+        method: POST
+        headers:
+          Content-Type: "application/json"
+          Authorization: "Basic {{ grafana_auth_header }}"
+        body: |
+          {
+            "name": "Prometheus",
+            "type": "prometheus",
+            "url": "http://localhost:9090", 
+            "access": "proxy",
+            "basicAuth": false
+          }
+        status_code: 200
+      register: grafana_datasource
+    - name: Debug response from adding Prometheus datasource
+      debug:
+        var: grafana_datasource

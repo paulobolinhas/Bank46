@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bank46 Services</title>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #fff;
+            color: #000;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+        header {
+            background-color: #000;
+            color: #fff;
+            text-align: center;
+            padding: 20px;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 36px;
+        }
+        .service-buttons {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .service-buttons button {
+            background-color: #000;
+            color: #fff;
+            border: 1px solid #fff;
+            padding: 15px 30px;
+            margin: 0 10px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        .service-buttons button:hover {
+            background-color: #fff;
+            color: #000;
+            border: 1px solid #000;
+        }
+        main {
+            flex: 1;
+            padding: 20px;
+            text-align: center;
+            overflow-y: auto;
+        }
+        .service {
+            display: none;
+        }
+        .service-content {
+            background-color: white;
+            border: 1px solid #ccc;
+            padding: 20px;
+            border-radius: 8px;
+            width: 300px;
+            margin: 0 auto;
+            margin-top: 20px;
+        }
+        input, button {
+            margin-top: 10px;
+            padding: 10px;
+            width: 75%;
+        }
+        button {
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            opacity: 0.8;
+        }
+        #insurance-service h1 {
+            color: blue;
+        }
+        #insurance-service button {
+            background-color: #002cf1;
+            color: white;
+        }
+        #loan-service h1 {
+            color: green;
+        }
+        #loan-service button {
+            background-color: #28a745;
+            color: white;
+        }
+        #transaction-service h1 {
+            color: red;
+        }
+        #transaction-service button {
+            background-color: #dc3545;
+            color: white;
+        }
+        #insurance-result, #loan-result, #transaction-result {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #333;
+        }
+        footer {
+            text-align: center;
+            padding: 20px;
+            background-color: #000;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Bank46</h1>
+</header>
+
+<div class="service-buttons">
+    <button onclick="showService('insurance-service')">Insurance Service</button>
+    <button onclick="showService('loan-service')">Loan Service</button>
+    <button onclick="showService('transaction-service')">Transaction Service</button>
+</div>
+
+<main>
+    <!-- Insurance Service -->
+    <div id="insurance-service" class="service">
+        <h1>Insurance Service</h1>
+
+        <div class="service-content">
+            <h2>Get All Insurance Records</h2>
+            <button id="get-all-insurances">Get All Insurances</button>
+            <div id="all-insurance-result"></div>
+        </div>
+
+        <div class="service-content">
+            <h2>Get Insurance Information by ID</h2>
+            <form id="insurance-form">
+                <input type="text" id="insurance-id" placeholder="Enter Insurance ID" required>
+                <button type="submit">Get Insurance Info</button>
+            </form>
+            <div id="insurance-result"></div>
+        </div>
+
+        <div class="service-content">
+            <h2>Create New Insurance</h2>
+            <form id="create-insurance-form">
+                <input type="text" id="owner-id" placeholder="Owner ID" required>
+                <input type="text" id="title" placeholder="Insurance Title" required>
+                <input type="number" id="monthly-payment" placeholder="Monthly Payment" required>
+                <input type="text" id="currency" placeholder="Currency" required>
+                <button type="submit">Create Insurance</button>
+            </form>
+            <div id="create-insurance-result"></div>
+        </div>
+    </div>
+
+    <!-- Loan Service -->
+    <div id="loan-service" class="service">
+        <h1>Loan Service</h1>
+
+        <div class="service-content">
+            <h2>Get All Loan Records</h2>
+            <button id="get-all-loans">Get All Loans</button>
+            <div id="all-loan-result"></div>
+        </div>
+
+        <div class="service-content">
+            <h2>Get Loan Information by ID</h2>
+            <form id="loan-form">
+                <input type="text" id="loan-id" placeholder="Enter Loan ID" required>
+                <button type="submit">Get Loan Info</button>
+            </form>
+            <div id="loan-result"></div>
+        </div>
+
+        <div class="service-content">
+            <h2>Create New Loan</h2>
+            <form id="create-loan-form">
+                <input type="text" id="loan-owner-id" placeholder="Owner ID" required>
+                <input type="text" id="loan-title" placeholder="Loan Title" required>
+                <input type="number" id="loan-amount" placeholder="Loan Amount" required>
+                <input type="number" id="loan-interest-rate" placeholder="Interest Rate (%)" required>
+                <button type="submit">Create Loan</button>
+            </form>
+            <div id="create-loan-result"></div>
+        </div>
+    </div>
+
+    <!-- Transaction Service -->
+    <div id="transaction-service" class="service">
+        <h1>Transaction Service</h1>
+
+        <div class="service-content">
+            <h2>Get All Transactions</h2>
+            <button id="get-all-transactions">Get All Transactions</button>
+            <div id="all-transactions-result"></div>
+        </div>
+
+        <div class="service-content">
+            <h2>Get Transaction Information</h2>
+            <form id="transaction-form">
+                <input type="text" id="transaction-id" placeholder="Enter Transaction ID" required>
+                <button type="submit">Get Transaction Info</button>
+            </form>
+            <div id="transaction-result"></div>
+        </div>
+
+        <div class="service-content">
+            <h2>Create New Transaction</h2>
+            <form id="create-transaction-form">
+                <input type="text" id="transaction-owner-id" placeholder="Owner ID" required>
+                <input type="number" id="transaction-amount" placeholder="Transaction Amount" required>
+                <input type="text" id="transaction-type" placeholder="Transaction Type" required>
+                <button type="submit">Create Transaction</button>
+            </form>
+            <div id="create-transaction-result"></div>
+        </div>
+    </div>
+</main>
+
+<footer>
+    <p>&copy; 2024 Bank46 - AGISIT Group 46.</p>
+    <p>{{ ansible_hostname }}</p>
+    <p>({{ ansible_default_ipv4.address }})</p>
+</footer>
+
+<script>
+    function showService(serviceId) {
+        const services = document.querySelectorAll('.service');
+        services.forEach(service => {
+            service.style.display = 'none';
+        });
+        document.getElementById(serviceId).style.display = 'block';
+    }
+</script>
+
+<script src="insurancePage/insuranceService.js"></script>
+<script src="loanPage/loanService.js"></script>
+<script src="transactionPage/transactionService.js"></script>
+
+</body>
+</html>

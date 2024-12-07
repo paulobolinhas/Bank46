@@ -1,0 +1,123 @@
+---
+- name: Install MongoDB 8.0 on Ubuntu 20.04 (Focal)
+  hosts: mongodb
+  become: true
+
+  vars:
+    database_name: "Bank46"
+    user_collection: "user"
+    insurance_collection: "insurance"
+
+  tasks:
+    - name: Install gnupg and curl
+      ansible.builtin.apt:
+        name:
+          - gnupg
+          - curl
+        state: present
+        update_cache: yes
+
+    - name: Import MongoDB GPG key
+      ansible.builtin.shell: |
+        curl -fsSL https://www.mongodb.org/static/pgp/server-8.0.asc | \
+        gpg --dearmor -o /usr/share/keyrings/mongodb-server-8.0.gpg
+
+    - name: Create MongoDB list file for Ubuntu 20.04
+      ansible.builtin.copy:
+        dest: /etc/apt/sources.list.d/mongodb-org-8.0.list
+        content: |
+          deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-8.0.gpg ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/8.0 multiverse
+
+    - name: Reload local package database
+      ansible.builtin.apt:
+        update_cache: yes
+
+    - name: Install MongoDB Community Server
+      ansible.builtin.apt:
+        name: mongodb-org
+        state: present
+        update_cache: yes
+
+    - name: Start and enable MongoDB service
+      ansible.builtin.systemd:
+        name: mongod
+        enabled: yes
+        state: started
+
+    - name: Print MongoDB version
+      ansible.builtin.command: mongod --version
+      register: mongo_version
+
+    - name: Show MongoDB version
+      debug:
+        msg: "MongoDB version installed: {{ mongo_version.stdout }}"
+
+    - name: Update MongoDB configuration
+      ansible.builtin.lineinfile:
+        path: /etc/mongod.conf
+        regexp: '^  bindIp:'
+        line: '  bindIp: 0.0.0.0'
+        state: present
+        create: yes
+      
+    - name: Restart MongoDB service to apply configuration changes
+      ansible.builtin.systemd:
+        name: mongod
+        state: restarted
+
+    - name: Wait for MongoDB to be ready on port 27017
+      ansible.builtin.wait_for:
+        host: "{{ ansible_host }}"
+        port: 27017
+        timeout: 30
+
+    - name: Connect to MongoDB and create a new database
+      ansible.builtin.shell: |
+        echo 'use {{ database_name }}' | mongosh
+      args:
+        warn: false
+    
+    ### Inserto into users ###
+    - name: Create a collection in the new database
+      ansible.builtin.shell: |
+        echo 'db.createCollection("{{ user_collection }}")' | mongosh {{ database_name }}
+      args:
+        warn: false
+
+    - name: Insert a document into the collection
+      ansible.builtin.shell: |
+        echo 'db.{{ user_collection }}.insertOne({id: "1", name: "Rui Martins"})' | mongosh {{ database_name }}
+      args:
+        warn: false
+    
+    - name: Insert a document into the collection
+      ansible.builtin.shell: |
+        echo 'db.{{ user_collection }}.insertOne({id: "2", name: "Paulo Bolinhas"})' | mongosh {{ database_name }}
+      args:
+        warn: false
+
+    ### Insert into insurance ###
+    - name: Create a collection in the new database
+      ansible.builtin.shell: |
+        echo 'db.createCollection("{{ insurance_collection }}")' | mongosh {{ database_name }}
+      args:
+        warn: false
+
+    - name: Insert a document into the collection
+      ansible.builtin.shell: |
+        echo 'db.{{ insurance_collection }}.insertOne({
+          owner_id: "1", 
+          title: "Car Insurance", 
+          monthly_payment : 12.5, 
+          currency: "EUR", 
+        })' | mongosh {{ database_name }}
+      args:
+        warn: false
+
+
+  # Handler to restart MongoDB
+  handlers:
+      - name: Restart MongoDB service
+        ansible.builtin.systemd:
+          name: mongod
+          state: restarted

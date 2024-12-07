@@ -1,0 +1,104 @@
+---
+### Microservices ###
+- hosts: microservices
+  gather_facts: True
+  remote_user: ubuntu
+  become: yes
+  become_method: sudo
+
+  vars:
+    node_version: "16"  # Node.js version to install (use "16.x" to match any minor version)
+    app_directory_base: "/var/www/microservice"  # Base directory on the remote server
+    local_directory_base: "templates/microservices"  # Base directory on your local machine containing microservice folders
+
+  tasks:
+
+    # Installation of Node.js ###
+    - name: Install curl
+      apt: 
+        name: curl
+        state: present
+
+    - name: Add Node.js Repository (NodeSource)
+      shell: curl -fsSL https://deb.nodesource.com/setup_{{ node_version }}.x | sudo -E bash -
+      args:
+        warn: false
+
+    - name: Update apt cache after adding Node.js repo
+      apt:
+        update_cache: yes
+        force_apt_get: yes
+
+    - name: Install Node.js with NPM
+      apt:
+        name:
+          - nodejs
+        state: present
+
+    ### Installation Verification ###
+    - name: Check Node.js version
+      command: node -v
+      register: node_version_output
+      ignore_errors: yes
+
+    - name: Output Node.js version (if installed)
+      debug:
+        msg: "Node.js version is: {{ node_version_output.stdout }}"
+
+    ## Copy code to machine ###
+    - name: Create app directory on the remote server
+      file:
+        path: "{{ app_directory_base }}/"
+        state: directory
+        mode: '0755'
+
+    - name: Copy microservice code from local to remote, excluding node_modules
+      synchronize:
+        src: "{{ local_directory_base }}/{{ inventory_hostname }}"
+        dest: "{{ app_directory_base }}/"
+        rsync_opts:
+          - "--exclude={{ local_directory_base }}/{{ inventory_hostname }}/node_modules"
+        mode: push
+        delete: no
+
+    ## Install dependencies ###
+    - name: Install dependencies with npm
+      npm:
+        path: "{{ app_directory_base }}/{{ inventory_hostname }}"
+        state: present
+
+    ### Install PM2 ###
+    - name: Ensure PM2 is installed globally
+      npm:
+        name: pm2
+        global: yes
+        state: present
+    
+    ## Start Application with PM2 ###
+    - name: Check if the microservice is running with PM2
+      shell: pm2 ls | grep "{{ inventory_hostname }}"
+      register: pm2_status
+      ignore_errors: true
+    
+    - name: Verify pm2 list output
+      debug:
+        msg: "pm2_status: {{ pm2_status }}"
+    
+    - name: Start or restart the microservice with PM2
+      shell: |
+        if [ "{{ pm2_status.rc }}" -ne 0 ]; then
+          pm2 start "{{ app_directory_base }}/{{ inventory_hostname }}/index.js" --name "{{ inventory_hostname }}";
+        else
+          pm2 restart "{{ inventory_hostname }}";
+        fi
+      register: pm2_start_result
+    
+    - name: Print start or restart result
+      debug:
+        msg: "Start/Restart result: {{ pm2_start_result }}"
+  
+    - name: Save PM2 process list and enable startup
+      shell: pm2 save && pm2 startup systemd
+    
+
+

@@ -1,0 +1,40 @@
+############# Machines #############
+balancer    ansible_host=34.116.183.247 ansible_user=ubuntu ansible_connection=ssh 
+
+web1        ansible_host=34.118.102.183 ansible_user=ubuntu ansible_connection=ssh 
+web2        ansible_host=34.116.211.236 ansible_user=ubuntu ansible_connection=ssh 
+
+insurance   ansible_host=34.118.65.35 ansible_user=ubuntu ansible_connection=ssh
+loan        ansible_host=34.118.14.117 ansible_user=ubuntu ansible_connection=ssh
+transaction ansible_host=34.116.183.148 ansible_user=ubuntu ansible_connection=ssh
+
+mongodb     ansible_host=34.118.19.129 ansible_user=ubuntu ansible_connection=ssh 
+
+monitor     ansible_host=34.118.69.2 ansible_user=ubuntu ansible_connection=ssh
+
+############# Groups #############
+
+[targets]
+balancer
+web1
+web2
+insurance
+loan
+transaction
+mongodb
+monitor
+
+[mgmt]
+localhost   ansible_connection=local
+
+[loadbal]
+balancer 
+
+[web]
+web1
+web2
+
+[microservices]
+insurance
+loan
+transaction
