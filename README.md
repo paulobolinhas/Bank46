@@ -41,11 +41,7 @@ A database backend service with persistent storage is employed to store data. Te
 
 ## Report
 
-[Report](docs/project-g46.odt)
-
-## Video
-
-[Video](yt)
+[Report](docs/project-g46.pdf)
 
 ## Contributing
 
